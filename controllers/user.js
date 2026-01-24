@@ -1,4 +1,3 @@
-import { check } from "zod";
 import { User } from "../models/user.js";
 import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
@@ -83,7 +82,7 @@ export const userLogin = async (req, res) => {
     const id = checkUser._id.toString();
     // token generating
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
-    const token = await new SignJWT({ userId: checkUser._id.toString() })
+    const token = await new SignJWT({ userId: id })
       .setIssuedAt()
       .setExpirationTime("24h")
       .setProtectedHeader({ alg: "HS256" })
@@ -106,8 +105,70 @@ export const userLogin = async (req, res) => {
   }
 };
 
+// change password
+
+export const chengePassword = async (req, res) => {
+  try {
+    const { email, password, newPassword } = req.body;
+    if (!email || !password || !newPassword) {
+      return res.status(400).json({ status: false, message: "Enter email" });
+    }
+    const checkUser = await User.findOne({ email });
+    if (!checkUser) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Enter valid email" });
+    }
+    if (!checkUser._id === req.userId) {
+      return res.status(401).json({ status: false, message: "Invalid User" });
+    }
+
+    // comparing password
+    const compare = await bcrypt.compare(password, checkUser.password);
+    console.log("compare", compare);
+    if (!compare) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Invalid old password" });
+    }
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await checkUser.updateOne({
+      password: hashed,
+    });
+    return res
+      .status(200)
+      .json({ status: true, message: "Password successfully updated" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal server error" });
+  }
+};
+
+
+
+
+// patient data added "/patient"
+
+export const addedPatient= async(req,res)=>{
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // admin added  "/user/admin"
 
 export const createAdmin = async (req, res) => {
   console.log("hello admin");
 };
+
+

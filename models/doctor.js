@@ -10,14 +10,6 @@ const patientSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    history: {
-      type: String,
-      default: null,
-    },
-    blood: {
-      type: String,
-      default: null,
-    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

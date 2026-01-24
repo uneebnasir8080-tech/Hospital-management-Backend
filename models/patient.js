@@ -6,11 +6,11 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    specialization: {
+    history: {
       type: String,
-      required: true,
+      default: null,
     },
-    experience: {
+    blood: {
       type: String,
       default: null,
     },
