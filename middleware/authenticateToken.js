@@ -8,4 +8,5 @@ export const authenticateToken= (req,res,next)=>{
     if(!token){
         return res.status(400).json({status:false, message:"Access token is required"})
     }
+    next()
 }
