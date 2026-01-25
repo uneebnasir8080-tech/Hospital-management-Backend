@@ -5,8 +5,6 @@ import { Patient } from "../models/patient.js";
 import { Admin } from "../models/admin.js";
 import { Doctor } from "../models/doctor.js";
 
-
-
 // creating user on "/create"
 
 export const createUser = async (req, res) => {
@@ -266,6 +264,85 @@ export const createDoctor = async (req, res) => {
     return res
       .status(200)
       .json({ status: true, message: "Created Successfull" });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
+  }
+};
+
+//  get user data with role "/user"
+export const getUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const role = req.user.role;
+    if (!userId) {
+      return res.status(400).json({
+        status: false,
+        message: "Something went wrong",
+      });
+    }
+    const getData = await User.findById(userId);
+    if (!getData) {
+      return res.status(404).json({ status: false, message: "User not foumd" });
+    }
+    let data;
+    if (role === "admin") {
+      data = await getData.populate("admin");
+    }
+    if (role === "patient") {
+      data = await getData.populate("patient");
+    }
+    if (role === "doctor") {
+      data = await getData.populate("doctor");
+    }
+    if (!data) {
+      return res.status(404).json({ status: false, message: "data not foumd" });
+    }
+    return res.status(200).json({
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
+  }
+};
+
+// get all data with all user and all roles "/user-all"
+
+export const getAllUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(400).json({
+        status: false,
+        message: "Something went wrong",
+      });
+    }
+    const role = req.user.role;
+    if (role !== "admin") {
+      return res
+        .status(401)
+        .json({ status: false, message: "Only admin can do that" });
+    }
+
+    const getData = await User.findById(userId);
+    if (!getData) {
+      return res.status(404).json({ status: false, message: "User not foumd" });
+    }
+    const allData = await User.find()
+      .populate("admin")
+      .populate("patient")
+      .populate("doctor");
+    if (!allData) {
+      return res.status(404).json({ status: false, message: "data not foumd" });
+    }
+    return res.status(200).json({ allData });
   } catch (error) {
     return res.status(500).json({
       status: false,

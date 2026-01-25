@@ -5,6 +5,8 @@ import {
   createAdmin,
   createDoctor,
   createUser,
+  getAllUser,
+  getUser,
   userLogin,
 } from "../controllers/user.js";
 import validate from "../middleware/validate.js";
@@ -26,5 +28,11 @@ router.post("/admin", authenticateToken, upload.single("admin"), createAdmin);
 
 // added doctor "/doctor"
 router.post("/doctor", authenticateToken, upload.single('doctor'), createDoctor)
+
+// get data with role data "/user"
+router.get("/user", authenticateToken, getUser)
+
+//get all user with all roles "/user-all"
+router.get("/user-all", authenticateToken,getAllUser)
 
 export default router;
