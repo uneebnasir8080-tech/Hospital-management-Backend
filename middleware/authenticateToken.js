@@ -27,7 +27,6 @@ export const authenticateToken = async (req, res, next) => {
     }
     req.userId = userId;
     req.user = checkUser;
-    console.log("user", checkUser);
     next();
   } catch (error) {
     if (error.name === "JsonWebTokenError") {

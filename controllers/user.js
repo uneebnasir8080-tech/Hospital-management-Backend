@@ -1,6 +1,11 @@
 import { User } from "../models/user.js";
 import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
+import { Patient } from "../models/patient.js";
+import { Admin } from "../models/admin.js";
+import { Doctor } from "../models/doctor.js";
+
+
 
 // creating user on "/create"
 
@@ -145,30 +150,127 @@ export const chengePassword = async (req, res) => {
   }
 };
 
-
-
-
 // patient data added "/patient"
 
-export const addedPatient= async(req,res)=>{
-  
-}
-
-
-
-
-
-
-
-
-
-
-
+export const addPatient = async (req, res) => {
+  try {
+    const { history, blood } = req.body;
+    if (!blood) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Feild shouldn't be empty" });
+    }
+    const { path } = req.file;
+    const id = req.userId;
+    if (req.user.role !== "patient") {
+      return res
+        .status(401)
+        .json({ status: false, message: "Only patient access this" });
+    }
+    const checkPatient = await Patient.findOne({ userId: id });
+    if (checkPatient) {
+      return res
+        .status(494)
+        .json({ status: false, message: "Patient already exists" });
+    }
+    const updateData = new Patient({
+      profile: path,
+      history,
+      blood,
+      userId: id,
+    });
+    const data = await updateData.save();
+    if (!data) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Form submitted unsuccessful" });
+    }
+    return res.status(200).json({ status: true, message: "Form Submitted" });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
+  }
+};
 
 // admin added  "/user/admin"
 
 export const createAdmin = async (req, res) => {
-  console.log("hello admin");
+  try {
+    const { path } = req.file;
+    const userId = req.userId;
+    if (req.user.role !== "admin") {
+      return res
+        .status(401)
+        .json({ status: false, message: "Only Admin can access this" });
+    }
+    const checkAdmin = await Admin.findOne({ userId });
+    if (checkAdmin) {
+      return res.status(404).json({ statsu: false, message: "Already exists" });
+    }
+    const savedData = new Admin({
+      profile: path,
+      userId,
+    });
+    const saved = await savedData.save();
+    if (!saved) {
+      return res
+        .status(404)
+        .json({ statsu: false, message: "Upload unsuccessfull" });
+    }
+    return res
+      .status(200)
+      .json({ statsu: true, message: "Created successfull" });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
+  }
 };
 
+// create doctor "/doctor"
 
+export const createDoctor = async (req, res) => {
+  try {
+    const { path } = req.file;
+    const userId = req.userId;
+    const { specialization, experience } = req.body;
+    if (!specialization || !experience) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Complete required data" });
+    }
+    if (req.body.role === "patient") {
+      return res.status(401).json({ status: false, message: "Access denied" });
+    }
+    const checkDoctor = await Doctor.findOne({ userId });
+    if (checkDoctor) {
+      return res.status(404).json({ status: false, message: "Already exists" });
+    }
+    const savedData = new Doctor({
+      specialization,
+      experience,
+      profile: path,
+      userId,
+    });
+    const saved = await savedData.save();
+    if (!saved) {
+      return res
+        .status(404)
+        .json({ status: false, message: "created unsuccessfull" });
+    }
+    return res
+      .status(200)
+      .json({ status: true, message: "Created Successfull" });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
+  }
+};

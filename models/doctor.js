@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
 
-const patientSchema = new mongoose.Schema(
+const doctorSchema = new mongoose.Schema(
   {
     profile: {
       type: String,
       default: null,
     },
     specialization: {
+      type: String,
+      required: true,
+    },
+    experience: {
       type: String,
       required: true,
     },
@@ -19,4 +23,4 @@ const patientSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export const Patient = mongoose.model("Patient", patientSchema);
+export const Doctor = mongoose.model("Doctor", doctorSchema);
