@@ -2,7 +2,7 @@ import "dotenv/config";
 import { connectDb } from "./config/connection.js";
 import express from "express";
 import authRouter from "./routes/userRoute.js";
-import doctorRoute from "./routes/doctorSchedule.js";
+import doctorRoute from "./routes/doctorRoute.js";
 import patientRoute from "./routes/patientRoute.js";
 
 const app = express();
@@ -12,6 +12,7 @@ const PORT = 5000;
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
 
 //   routes
 app.use("/", authRouter);

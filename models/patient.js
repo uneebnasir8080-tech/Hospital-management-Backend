@@ -29,7 +29,7 @@ const patientSchema = new mongoose.Schema(
 
 patientSchema.virtual("appointment", {
   ref: "Appointment",
-  localField: "_id",
+  localField: "userId",
   foreignField: "patientId",
 });
 export const Patient = mongoose.model("Patient", patientSchema);

@@ -128,7 +128,6 @@ export const chengePassword = async (req, res) => {
 
     // comparing password
     const compare = await bcrypt.compare(password, checkUser.password);
-    console.log("compare", compare);
     if (!compare) {
       return res
         .status(404)
