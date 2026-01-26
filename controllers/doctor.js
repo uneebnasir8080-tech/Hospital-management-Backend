@@ -1,5 +1,8 @@
+import { Appointment } from "../models/appointment.js";
 import { Doctor } from "../models/doctor.js";
 import { Schedule } from "../models/schedule.js";
+import { sendMail } from "../utils/emailSender.js";
+import { emailVerification } from "../utils/emailTemplate/emailverification.js";
 
 export const setSchedule = async (req, res) => {
   try {
@@ -70,13 +73,11 @@ export const getSchedule = async (req, res) => {
     }
     return res.status(200).json({ getDoctor });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        message: "Internal server error",
-        error: error?.message,
-      });
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
   }
 };
 
@@ -106,12 +107,62 @@ export const getAppointment = async (req, res) => {
     }
     return res.status(200).json({ getData });
   } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
+  }
+};
+
+// cancel the appointment "/cancel-appointment"
+
+export const cancelAppointment = async (req, res) => {
+  try {
+    const { doctorId, patientId, patientEmail } = req.body;
+    if (!doctorId || !patientId) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Fill the required feild" });
+    }
+
+    //  checking appoing exist or not
+    const checkAppointment = await Appointment.findOne({ doctorId, patientId });
+    if (!checkAppointment) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Appointment not found" });
+    }
+    if (checkAppointment.status === "cancelled") {
+      return res
+        .status(404)
+        .json({ status: false, message: "Appointment already cancelled" });
+    }
+    const update = await checkAppointment.updateOne({
+      status: "cancelled",
+    });
+    if (!update) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Appointment not cancelled" });
+    }
+    await sendMail(
+      "Appointment Cancelled",
+      patientEmail,
+      emailVerification(
+        "Appointment Cancelled",
+        "Your Appointment are cancelled by the doctor for more information click this button",
+        "https://www.linkedin.com/in/uneeb-nasir80",
+      ),
+    );
     return res
-      .status(500)
-      .json({
-        status: false,
-        message: "Internal server error",
-        error: error?.message,
-      });
+      .status(200)
+      .json({ status: true, message: "Appointment cancelled" });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
   }
 };

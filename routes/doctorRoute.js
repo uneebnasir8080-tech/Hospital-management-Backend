@@ -1,4 +1,4 @@
-import { getAppointment, getSchedule, setSchedule } from "../controllers/doctor.js";
+import { cancelAppointment, getAppointment, getSchedule, setSchedule } from "../controllers/doctor.js";
 import { authenticateToken } from "../middleware/authenticateToken.js";
 import { Router } from "express";
 
@@ -12,5 +12,8 @@ router.get("/schedule",authenticateToken,getSchedule)
 
 // get doctor with appointment 
 router.get("/appointments", authenticateToken, getAppointment)
+
+//cancel appointment 
+router.post("/cancel-appointment", authenticateToken, cancelAppointment)
 
 export default router

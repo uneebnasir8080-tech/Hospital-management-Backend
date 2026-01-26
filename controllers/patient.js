@@ -2,6 +2,8 @@ import { Appointment } from "../models/appointment.js";
 import { Doctor } from "../models/doctor.js";
 import { Patient } from "../models/patient.js";
 import { normalizeDate, weekDays } from "../lib/weekdays.js";
+import {sendMail} from "../utils/emailSender.js"
+import {emailVerification} from "../utils/emailTemplate/emailverification.js"
 
 // patient make appointment "/patient/appointment"
 
@@ -81,6 +83,24 @@ export const makeAppointment = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Appointment not booked" });
     }
+    await sendMail(
+      "Appointment Booked",
+      checkPatient.email,
+      emailVerification(
+        "Appointment Booked",
+        "we booked your appointment with this doctor and the date is this 12/02/2026 and the time is: 9:00 am for more information click this button",
+        "https://www.linkedin.com/in/uneeb-nasir80",
+      ),
+    );
+    await sendMail(
+      "Appointment Booked",
+      checkDoctor.email,
+      emailVerification(
+        "Appointment Booked",
+        "Your Appointment is booked ",
+        "https://www.linkedin.com/in/uneeb-nasir80",
+      ),
+    );
     return res
       .status(200)
       .json({ status: true, message: "Appointment booked" });

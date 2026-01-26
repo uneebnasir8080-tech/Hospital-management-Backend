@@ -33,6 +33,6 @@ router.post("/doctor", authenticateToken, upload.single('doctor'), createDoctor)
 router.get("/user", authenticateToken, getUser)
 
 //get all user with all roles "/user-all"
-router.get("/user-all", authenticateToken,getAllUser)
+router.get("/user-all", authenticateToken, getAllUser)
 
 export default router;
