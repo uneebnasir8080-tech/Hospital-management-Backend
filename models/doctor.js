@@ -29,13 +29,14 @@ const doctorSchema = new mongoose.Schema(
 
 doctorSchema.virtual("schedule", {
   ref: "Schedule",
-  localField: "_id",
+  localField: "userId",
   foreignField: "doctorId",
+  justOne:true
 });
 
 doctorSchema.virtual("appointment", {
   ref: "Appointment",
-  localField: "_id",
+  localField: "userId",
   foreignField: "doctorId",
 });
 export const Doctor = mongoose.model("Doctor", doctorSchema);
