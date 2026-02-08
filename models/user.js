@@ -34,16 +34,19 @@ userSchema.virtual("admin", {
   ref: "Admin",
   localField: "_id",
   foreignField: "userId",
+  
 });
 userSchema.virtual("patient", {
   ref: "Patient",
   localField: "_id",
   foreignField: "userId",
+  justOne:true
 });
 userSchema.virtual("doctor", {
   ref: "Doctor",
   localField: "_id",
   foreignField: "userId",
+  justOne:true
 });
 
 export const User = mongoose.model("User", userSchema);

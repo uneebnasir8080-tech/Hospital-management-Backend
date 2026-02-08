@@ -1,17 +1,14 @@
 import mongoose from "mongoose";
+// import dotenv from "dotenv";
 
-const MONGODB_URL = process.env.DATABASE_URL;
+// dotenv.config();
 
-if (!MONGODB_URL) {
-  throw new Error("❌ MONGODB environment variable not defined");
-}
-
-export async function connectDb() {
-  if (mongoose.connection.readyState >= 1) {
-    console.log("✅ MongoDB already connected");
+export const connectDb = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB Connected ✅");
+  } catch (error) {
+    console.error("MongoDB connection error ❌:", error);
+    process.exit(1);
   }
-  await mongoose.connect(MONGODB_URL, {
-    dbName: "hospital-management",
-  });
-  console.log("✅ MongoDB connected");
-}
+};

@@ -91,6 +91,7 @@ export const userLogin = async (req, res) => {
       .setProtectedHeader({ alg: "HS256" })
       .sign(secret);
     const userdata = {
+      id:checkUser._id,
       name: checkUser.name,
       email: checkUser.email,
       role: checkUser.role,
@@ -98,13 +99,13 @@ export const userLogin = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "Login Successfull",
-      data: userdata,
+      user: userdata,
       token,
     });
   } catch (error) {
     return res
       .status(500)
-      .json({ status: false, message: "Internal server error" });
+      .json({ status: false, message: "Internal server error" , error:error?.message});
   }
 };
 
@@ -151,8 +152,8 @@ export const chengePassword = async (req, res) => {
 
 export const addPatient = async (req, res) => {
   try {
-    const { history, blood } = req.body;
-    if (!blood) {
+    const { age, history, gender, blood } = req.body;
+    if (!blood || !gender) {
       return res
         .status(400)
         .json({ status: false, message: "Feild shouldn't be empty" });
@@ -172,7 +173,9 @@ export const addPatient = async (req, res) => {
     }
     const updateData = new Patient({
       profile: path,
+      age,
       history,
+      gender,
       blood,
       userId: id,
     });
@@ -235,21 +238,26 @@ export const createDoctor = async (req, res) => {
   try {
     const { path } = req.file;
     const userId = req.userId;
-    const { specialization, experience } = req.body;
-    if (!specialization || !experience) {
+    if(!req.body.role){
+      return res
+        .status(400)
+        .json({ status: false, message: "Role is required" });
+    }
+    const { age, specialization ,gender , experience } = req.body;
+    if (!specialization || !experience || !gender) {
       return res
         .status(400)
         .json({ status: false, message: "Complete required data" });
     }
-    if (req.body.role === "patient") {
-      return res.status(401).json({ status: false, message: "Access denied" });
-    }
-    const checkDoctor = await Doctor.findOne({ userId });
+    if (req.body.role === "doctor" || req.body.role === "doctor" ) {
+       const checkDoctor = await Doctor.findOne({ userId });
     if (checkDoctor) {
       return res.status(404).json({ status: false, message: "Already exists" });
     }
     const savedData = new Doctor({
+      age,
       specialization,
+      gender,
       experience,
       profile: path,
       userId,
@@ -263,6 +271,9 @@ export const createDoctor = async (req, res) => {
     return res
       .status(200)
       .json({ status: true, message: "Created Successfull" });
+    }
+    return res.status(401).json({ status: false, message: "Access denied" });
+   
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -276,11 +287,11 @@ export const createDoctor = async (req, res) => {
 export const getUser = async (req, res) => {
   try {
     const userId = req.userId;
-    const role = req.user.role;
+    const role = req.user.role
     if (!userId) {
       return res.status(400).json({
         status: false,
-        message: "Something went wrong",
+        message: "Something went wrong", 
       });
     }
     const getData = await User.findById(userId);
@@ -306,7 +317,7 @@ export const getUser = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: "Internal server error",
+      message: "Internal server error in this",
       error: error?.message,
     });
   }

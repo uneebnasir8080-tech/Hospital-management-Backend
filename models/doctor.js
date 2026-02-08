@@ -6,9 +6,17 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    age: {
+      type: String,
+      default: null,
+    },
     specialization: {
       type: String,
       required: true,
+    },
+    gender: {
+      type: String,
+      required:true,
     },
     experience: {
       type: String,
