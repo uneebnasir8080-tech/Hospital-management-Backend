@@ -91,7 +91,7 @@ export const userLogin = async (req, res) => {
       .setProtectedHeader({ alg: "HS256" })
       .sign(secret);
     const userdata = {
-      id:checkUser._id,
+      id: checkUser._id,
       name: checkUser.name,
       email: checkUser.email,
       role: checkUser.role,
@@ -105,7 +105,11 @@ export const userLogin = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ status: false, message: "Internal server error" , error:error?.message});
+      .json({
+        status: false,
+        message: "Internal server error",
+        error: error?.message,
+      });
   }
 };
 
@@ -238,42 +242,43 @@ export const createDoctor = async (req, res) => {
   try {
     const { path } = req.file;
     const userId = req.userId;
-    if(!req.body.role){
+    if (!req.body.role) {
       return res
         .status(400)
         .json({ status: false, message: "Role is required" });
     }
-    const { age, specialization ,gender , experience } = req.body;
+    const { age, specialization, gender, experience } = req.body;
     if (!specialization || !experience || !gender) {
       return res
         .status(400)
         .json({ status: false, message: "Complete required data" });
     }
-    if (req.body.role === "doctor" || req.body.role === "doctor" ) {
-       const checkDoctor = await Doctor.findOne({ userId });
-    if (checkDoctor) {
-      return res.status(404).json({ status: false, message: "Already exists" });
-    }
-    const savedData = new Doctor({
-      age,
-      specialization,
-      gender,
-      experience,
-      profile: path,
-      userId,
-    });
-    const saved = await savedData.save();
-    if (!saved) {
+    if (req.body.role === "doctor" || req.body.role === "doctor") {
+      const checkDoctor = await Doctor.findOne({ userId });
+      if (checkDoctor) {
+        return res
+          .status(404)
+          .json({ status: false, message: "Already exists" });
+      }
+      const savedData = new Doctor({
+        age,
+        specialization,
+        gender,
+        experience,
+        profile: path,
+        userId,
+      });
+      const saved = await savedData.save();
+      if (!saved) {
+        return res
+          .status(404)
+          .json({ status: false, message: "created unsuccessfull" });
+      }
       return res
-        .status(404)
-        .json({ status: false, message: "created unsuccessfull" });
-    }
-    return res
-      .status(200)
-      .json({ status: true, message: "Created Successfull" });
+        .status(200)
+        .json({ status: true, message: "Created Successfull" });
     }
     return res.status(401).json({ status: false, message: "Access denied" });
-   
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -286,12 +291,12 @@ export const createDoctor = async (req, res) => {
 //  get user data with role "/user"
 export const getUser = async (req, res) => {
   try {
-    const userId = req.userId;
-    const role = req.user.role
+    const {userId} = req.query;
+    const role = req.user.role;
     if (!userId) {
       return res.status(400).json({
         status: false,
-        message: "Something went wrong", 
+        message: "Something went wrong",
       });
     }
     const getData = await User.findById(userId);
@@ -343,17 +348,45 @@ export const getAllUser = async (req, res) => {
 
     const getData = await User.findById(userId);
     if (!getData) {
-      return res.status(404).json({ status: false, message: "User not foumd" });
+      return res.status(404).json({ status: false, message: "User not found" });
     }
     const allData = await User.find()
       .populate("admin")
       .populate("patient")
       .populate("doctor");
     if (!allData) {
-      return res.status(404).json({ status: false, message: "data not foumd" });
+      return res.status(404).json({ status: false, message: "data not found" });
     }
     return res.status(200).json({ allData });
   } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
+  }
+};
+
+// get all doctors "/all-doctor"
+
+export const gettAllDoctor = async (req, res) => {
+  try{
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(400).json({
+      status: false,
+      message: "Something went wrong",
+    });
+  }
+  const role = "doctor";
+  // getting doctor
+  const getDoc = await User.find({ role }).populate("doctor");
+  if (!getDoc) {
+    return res.status(404).json({ status: false, message: "Doctor not found" });
+  }
+  ;
+  return res.status(200).json({ getDoc });
+   } catch (error) {
     return res.status(500).json({
       status: false,
       message: "Internal server error",

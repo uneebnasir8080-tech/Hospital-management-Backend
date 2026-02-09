@@ -1,17 +1,18 @@
 import { Appointment } from "../models/appointment.js";
 import { Doctor } from "../models/doctor.js";
 import { Schedule } from "../models/schedule.js";
+import { User } from "../models/user.js";
 import { sendMail } from "../utils/emailSender.js";
 import { emailVerification } from "../utils/emailTemplate/emailverification.js";
 
 export const setSchedule = async (req, res) => {
   try {
-    const { doctorId, days, slotDuration, startTime, endTime } = req.body;
+    const { doctorId, days, slotDuration, startTime, endTime, fee } = req.body;
     const role = req.user.role;
     if (role === "patient") {
       return res.status(400).json({ status: false, message: "Access deined" });
     }
-    if (!doctorId || !days || !slotDuration || !startTime || !endTime) {
+    if (!doctorId || !days || !slotDuration || !startTime || !endTime || !fee) {
       return res
         .status(400)
         .json({ status: false, message: "Fill required feilds" });
@@ -35,6 +36,7 @@ export const setSchedule = async (req, res) => {
       slotDuration,
       startTime,
       endTime,
+      fee
     });
     const saved = await savedData.save();
     if (!saved) {
@@ -58,14 +60,22 @@ export const setSchedule = async (req, res) => {
 
 export const getSchedule = async (req, res) => {
   try {
-    const userId = req.userId;
+    const {docId}=req.query
+    // const userId = req.userId;
+    // console.log("first", docId)
     // const doctorId = req.body;
-    if (!userId) {
+    if (!docId) {
       return res
         .status(400)
         .json({ status: false, message: "Doctor Id required" });
     }
-    const getDoctor = await Doctor.findOne({ userId }).populate("schedule");
+    const getDoctor = await User.findOne({ _id: docId })
+  .populate({
+    path: "doctor",
+    populate: {
+      path: "schedule"
+    }
+  });
     if (!getDoctor) {
       return res
         .status(404)

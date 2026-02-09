@@ -6,6 +6,7 @@ import {
   createDoctor,
   createUser,
   getAllUser,
+  gettAllDoctor,
   getUser,
   userLogin,
 } from "../controllers/user.js";
@@ -34,5 +35,8 @@ router.get("/user", authenticateToken, getUser)
 
 //get all user with all roles "/user-all"
 router.get("/user-all", authenticateToken, getAllUser)
+
+//get all doctor "/all-doctor"
+router.get("/all-doctor", authenticateToken, gettAllDoctor)
 
 export default router;

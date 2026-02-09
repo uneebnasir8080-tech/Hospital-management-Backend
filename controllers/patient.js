@@ -103,7 +103,7 @@ export const makeAppointment = async (req, res) => {
     );
     return res
       .status(200)
-      .json({ status: true, message: "Appointment booked" });
+      .json({ status: true, message: "Confirm Payment" });
   } catch (error) {
     return res.status(500).json({
       status: false,
