@@ -5,6 +5,7 @@ import {
   createAdmin,
   createDoctor,
   createUser,
+  getAllDoctors,
   getAllUser,
   gettAllDoctor,
   getUser,
@@ -36,7 +37,8 @@ router.get("/user", authenticateToken, getUser)
 //get all user with all roles "/user-all"
 router.get("/user-all", authenticateToken, getAllUser)
 
-//get all doctor "/all-doctor"
-router.get("/all-doctor", authenticateToken, gettAllDoctor)
+// get all doctorss 
+router.get("/all-doctors", authenticateToken, getAllDoctors)
+
 
 export default router;

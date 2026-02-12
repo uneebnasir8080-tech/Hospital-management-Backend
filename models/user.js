@@ -34,7 +34,7 @@ userSchema.virtual("admin", {
   ref: "Admin",
   localField: "_id",
   foreignField: "userId",
-  
+  justOne:true  
 });
 userSchema.virtual("patient", {
   ref: "Patient",

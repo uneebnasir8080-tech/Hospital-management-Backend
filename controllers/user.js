@@ -67,7 +67,10 @@ export const userLogin = async (req, res) => {
     }
 
     // checking user exists or not
-    const checkUser = await User.findOne({ email });
+    const checkUser = await User.findOne({ email })
+    .populate("doctor")
+    .populate("patient")
+    .populate("admin")
     if (!checkUser) {
       return res
         .status(404)
@@ -96,6 +99,31 @@ export const userLogin = async (req, res) => {
       email: checkUser.email,
       role: checkUser.role,
     };
+    //checking their profile data filled or not 
+    if(checkUser.role==="patient" && checkUser.patient===null){
+      return res.status(200).json({
+      status: true,
+      message: "Profile inComplete",
+      user: userdata,
+      token,
+    });
+    }
+     if(checkUser.role==="doctor" && checkUser.doctor===null){
+      return res.status(200).json({
+      status: true,
+      message: "Profile inComplete",
+      user: userdata,
+      token,
+    });
+  }
+   if(checkUser.role==="admin" && checkUser.admin===null){
+      return res.status(200).json({
+      status: true,
+      message: "Profile inComplete",
+      user: userdata,
+      token,
+    });
+  }
     return res.status(200).json({
       status: true,
       message: "Login Successfull",
@@ -367,26 +395,24 @@ export const getAllUser = async (req, res) => {
   }
 };
 
-// get all doctors "/all-doctor"
 
-export const gettAllDoctor = async (req, res) => {
-  try{
-  const userId = req.userId;
-  if (!userId) {
-    return res.status(400).json({
-      status: false,
-      message: "Something went wrong",
-    });
-  }
-  const role = "doctor";
-  // getting doctor
-  const getDoc = await User.find({ role }).populate("doctor");
-  if (!getDoc) {
-    return res.status(404).json({ status: false, message: "Doctor not found" });
-  }
-  ;
-  return res.status(200).json({ getDoc });
-   } catch (error) {
+// get all doctors 
+
+export const getAllDoctors = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(400).json({
+        status: false,
+        message: "Something went wrong",
+      });
+    }
+    const getData = await User.find({role:"doctor"});
+    if (!getData) {
+      return res.status(404).json({ status: false, message: "Doctor not foumd" });
+    }
+    return res.status(200).json({ getData });
+  } catch (error) {
     return res.status(500).json({
       status: false,
       message: "Internal server error",

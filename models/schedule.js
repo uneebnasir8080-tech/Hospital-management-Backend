@@ -28,10 +28,6 @@ const scheduleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    fee:{
-      type:String,
-      required:true
-    }
   },
   { timestamps: true },
 );

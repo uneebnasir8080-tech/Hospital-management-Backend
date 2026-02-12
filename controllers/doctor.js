@@ -79,7 +79,7 @@ export const getSchedule = async (req, res) => {
     if (!getDoctor) {
       return res
         .status(404)
-        .json({ status: false, message: "Doctor not found" });
+        .json({ status: false, message: "Schedule not found" });
     }
     return res.status(200).json({ getDoctor });
   } catch (error) {
