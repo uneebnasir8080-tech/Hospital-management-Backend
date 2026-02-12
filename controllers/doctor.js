@@ -6,12 +6,12 @@ import { emailVerification } from "../utils/emailTemplate/emailverification.js";
 
 export const setSchedule = async (req, res) => {
   try {
-    const { doctorId, days, slotDuration, startTime, endTime } = req.body;
+    const { doctorId, days, slotDuration, startTime, endTime, fee } = req.body;
     const role = req.user.role;
     if (role === "patient") {
       return res.status(400).json({ status: false, message: "Access deined" });
     }
-    if (!doctorId || !days || !slotDuration || !startTime || !endTime) {
+    if (!doctorId || !days || !slotDuration || !startTime || !endTime || !fee) {
       return res
         .status(400)
         .json({ status: false, message: "Fill required feilds" });
@@ -35,6 +35,7 @@ export const setSchedule = async (req, res) => {
       slotDuration,
       startTime,
       endTime,
+      fee
     });
     const saved = await savedData.save();
     if (!saved) {
@@ -69,7 +70,7 @@ export const getSchedule = async (req, res) => {
     if (!getDoctor) {
       return res
         .status(404)
-        .json({ status: false, message: "Doctor not found" });
+        .json({ status: false, message: "Schedule not found" });
     }
     return res.status(200).json({ getDoctor });
   } catch (error) {
