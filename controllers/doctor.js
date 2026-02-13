@@ -7,12 +7,15 @@ import { emailVerification } from "../utils/emailTemplate/emailverification.js";
 
 export const setSchedule = async (req, res) => {
   try {
+
     const { doctorId, days, slot, startTime, endTime, fee } = req.body;
     const role = req.user.role;
     if (role === "patient") {
       return res.status(400).json({ status: false, message: "Access deined" });
     }
+
     if (!doctorId || !days || !slot || !startTime || !endTime || !fee) {
+
       return res
         .status(400)
         .json({ status: false, message: "Fill required feilds" });
