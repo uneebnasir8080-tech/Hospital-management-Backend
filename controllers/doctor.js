@@ -69,13 +69,9 @@ export const getSchedule = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Doctor Id required" });
     }
-    const getDoctor = await User.findOne({ _id: docId })
-  .populate({
-    path: "doctor",
-    populate: {
-      path: "schedule"
-    }
-  });
+    const getDoctor = await Doctor.findOne({ _id: docId })
+    .populate("schedule")
+    .populate('userId')
     if (!getDoctor) {
       return res
         .status(404)

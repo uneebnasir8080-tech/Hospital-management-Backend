@@ -5,9 +5,10 @@ import {
   createAdmin,
   createDoctor,
   createUser,
+  deletePatient,
   getAllDoctors,
+  getAllPatient,
   getAllUser,
-  gettAllDoctor,
   getUser,
   userLogin,
 } from "../controllers/user.js";
@@ -37,8 +38,13 @@ router.get("/user", authenticateToken, getUser)
 //get all user with all roles "/user-all"
 router.get("/user-all", authenticateToken, getAllUser)
 
-// get all doctorss 
+// get all doctors
 router.get("/all-doctors", authenticateToken, getAllDoctors)
 
+// get all patient
+router.get("/all-patient", authenticateToken, getAllPatient)
+
+// delete patient 
+router.delete("/patient/:id",authenticateToken, deletePatient)
 
 export default router;

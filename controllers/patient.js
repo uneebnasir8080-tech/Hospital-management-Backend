@@ -30,7 +30,7 @@ export const makeAppointment = async (req, res) => {
     const day = weekDays(date);
 
     //   checking doctor
-    const checkDoctor = await Doctor.findOne({ userId: doctorId }).populate(
+    const checkDoctor = await Doctor.findOne({ _id: doctorId }).populate(
       "schedule",
     );
     if (!checkDoctor || !checkDoctor.schedule) {
@@ -128,7 +128,15 @@ export const getAppointment = async (req, res) => {
         .status(401)
         .json({ status: false, message: "Only patient can get this" });
     }
-    const getData = await Patient.findOne({ userId }).populate("appointment");
+    const getData = await Patient.findOne({ userId }).populate({
+      path:"appointment",
+      populate:{
+        path:"doctorId",
+        populate:{
+          path:"userId"
+        }
+      }
+    })
     if (!getData) {
       return res
         .status(400)
