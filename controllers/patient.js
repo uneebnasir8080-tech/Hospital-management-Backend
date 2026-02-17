@@ -30,15 +30,18 @@ export const makeAppointment = async (req, res) => {
     const day = weekDays(date);
 
     //   checking doctor
-    const checkDoctor = await Doctor.findOne({ _id: doctorId }).populate(
-      "schedule",
-    );
+    const checkDoctor = await Doctor.findOne({ _id: doctorId })
+    .populate("schedule",)
+    .populate("appointment")
+
     if (!checkDoctor || !checkDoctor.schedule) {
       return res
         .status(404)
         .json({ status: false, message: "Doctor or schedule not exists" });
     }
 
+    
+    const checkingAppointment= checkDoctor?.appointment
     //   checking patient
     const checkPatient = await Patient.findOne({ userId: patientId });
     if (!checkPatient) {
@@ -46,11 +49,29 @@ export const makeAppointment = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Patient not exists" });
     }
+    // checking doctor avaiable on specific day 
     if (!checkDoctor.schedule.days.includes(day)) {
       return res
         .status(401)
         .json({ status: false, message: `Doctor is not available on ${day}` });
     }
+
+   // check Appointment doctor has already appointment on that day or not 
+// const isBooked = checkingAppointment.some((check) =>
+//   check.doctorId === doctorId &&
+//   check.time === time &&
+//   normalizeDate(check.date) === date
+// );
+
+
+// if (isBooked) {
+//   return res.status(404).json({
+//     status: false,
+//     message: "Doctor slot already booked",
+//   });
+// }
+
+
     //  check appointment avaiable or not
     const slotBooked = await Appointment.findOne({
       doctorId,
@@ -137,6 +158,46 @@ export const getAppointment = async (req, res) => {
         }
       }
     })
+    if (!getData) {
+      return res
+        .status(400)
+        .json({ status: false, message: "No Record found" });
+    }
+    return res.status(200).json({ getData });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server Error",
+      error: error?.message,
+    });
+  }
+};
+
+
+// get all patient and appointments with doctor 
+
+export const getAllAppointment = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Reference not found" });
+    }
+    const getData = await Appointment.find()
+    .populate('patientId')
+    .populate('doctorId')
+    
+    
+    // .populate({
+    //   path:"appointment",
+    //   populate:{
+    //     path:"doctorId",
+    //     populate:{
+    //       path:"userId"
+    //     }
+    //   }
+    // })
     if (!getData) {
       return res
         .status(400)

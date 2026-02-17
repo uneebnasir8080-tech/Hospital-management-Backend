@@ -4,6 +4,7 @@ import { SignJWT } from "jose";
 import { Patient } from "../models/patient.js";
 import { Admin } from "../models/admin.js";
 import { Doctor } from "../models/doctor.js";
+import { Appointment } from "../models/appointment.js";
 
 // creating user on "/create"
 
@@ -41,9 +42,13 @@ export const createUser = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Something went wrong" });
     }
+   const data = {
+  id: savedUser.id,
+  name: savedUser.name,
+};
     return res
       .status(200)
-      .json({ status: true, message: "Successfully registered" });
+      .json({ status: true, message: "Successfully registered",data });
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -68,9 +73,9 @@ export const userLogin = async (req, res) => {
 
     // checking user exists or not
     const checkUser = await User.findOne({ email })
-    .populate("doctor")
-    .populate("patient")
-    .populate("admin")
+      .populate("doctor")
+      .populate("patient")
+      .populate("admin");
     if (!checkUser) {
       return res
         .status(404)
@@ -99,31 +104,31 @@ export const userLogin = async (req, res) => {
       email: checkUser.email,
       role: checkUser.role,
     };
-    //checking their profile data filled or not 
-    if(checkUser.role==="patient" && checkUser.patient===null){
+    //checking their profile data filled or not
+    if (checkUser.role === "patient" && checkUser.patient === null) {
       return res.status(200).json({
-      status: true,
-      message: "Profile inComplete",
-      user: userdata,
-      token,
-    });
+        status: true,
+        message: "Profile inComplete",
+        user: userdata,
+        token,
+      });
     }
-     if(checkUser.role==="doctor" && checkUser.doctor===null){
+    if (checkUser.role === "doctor" && checkUser.doctor === null) {
       return res.status(200).json({
-      status: true,
-      message: "Profile inComplete",
-      user: userdata,
-      token,
-    });
-  }
-   if(checkUser.role==="admin" && checkUser.admin===null){
+        status: true,
+        message: "Profile inComplete",
+        user: userdata,
+        token,
+      });
+    }
+    if (checkUser.role === "admin" && checkUser.admin === null) {
       return res.status(200).json({
-      status: true,
-      message: "Profile inComplete",
-      user: userdata,
-      token,
-    });
-  }
+        status: true,
+        message: "Profile inComplete",
+        user: userdata,
+        token,
+      });
+    }
     return res.status(200).json({
       status: true,
       message: "Login Successfull",
@@ -131,13 +136,11 @@ export const userLogin = async (req, res) => {
       token,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        message: "Internal server error",
-        error: error?.message,
-      });
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error?.message,
+    });
   }
 };
 
@@ -191,12 +194,7 @@ export const addPatient = async (req, res) => {
         .json({ status: false, message: "Feild shouldn't be empty" });
     }
     const { path } = req.file;
-    const id = req.userId;
-    if (req.user.role !== "patient") {
-      return res
-        .status(401)
-        .json({ status: false, message: "Only patient access this" });
-    }
+    const {id} = req.query;
     const checkPatient = await Patient.findOne({ userId: id });
     if (checkPatient) {
       return res
@@ -319,7 +317,7 @@ export const createDoctor = async (req, res) => {
 //  get user data with role "/user"
 export const getUser = async (req, res) => {
   try {
-    const {userId} = req.query;
+    const { userId } = req.query;
     const role = req.user.role;
     if (!userId) {
       return res.status(400).json({
@@ -395,8 +393,7 @@ export const getAllUser = async (req, res) => {
   }
 };
 
-
-// get all doctors 
+// get all doctors
 
 export const getAllDoctors = async (req, res) => {
   try {
@@ -407,16 +404,17 @@ export const getAllDoctors = async (req, res) => {
         message: "Something went wrong",
       });
     }
-    const getData = await User.find({role:"doctor"})
-    .populate({
-    path: "doctor",
-    populate: {
-      path: "schedule"
-    }
-  });
-    
+    const getData = await User.find({ role: "doctor" }).populate({
+      path: "doctor",
+      populate: {
+        path: "schedule",
+      },
+    });
+
     if (!getData) {
-      return res.status(404).json({ status: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Doctor not found" });
     }
     return res.status(200).json({ getData });
   } catch (error) {
@@ -428,8 +426,7 @@ export const getAllDoctors = async (req, res) => {
   }
 };
 
-
-// get all patient 
+// get all patient
 
 export const getAllPatient = async (req, res) => {
   try {
@@ -440,9 +437,11 @@ export const getAllPatient = async (req, res) => {
         message: "Something went wrong",
       });
     }
-    const getData = await User.find({role:"patient"}).populate('patient');
+    const getData = await User.find({ role: "patient" }).populate("patient");
     if (!getData) {
-      return res.status(404).json({ status: false, message: "Patient not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Patient not found" });
     }
     return res.status(200).json({ getData });
   } catch (error) {
@@ -454,26 +453,32 @@ export const getAllPatient = async (req, res) => {
   }
 };
 
-// delete patient 
+// delete patient
 
-export const deletePatient= async(req, res)=>{
-  const userId= req.userId
-  if(!userId){
-     return res.status(400).json({
-        status: false,
-        message: "Something went wrong",
-      });
+export const deletePatient = async (req, res) => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(400).json({
+      status: false,
+      message: "Something went wrong",
+    });
   }
-  const {id} = req.params
-  
-  // checking exist or not 
-  const checkPatient= await User.findById(id)
-  if(!checkPatient){
-    return res.status(404).json({status:false, message:"Patient not exists"})
+  const { id } = req.params;
+  try {
+    // checking exist or not
+    const checkPatient = await User.findByIdAndDelete(id);
+    if (!checkPatient) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Patient not exists" });
+    }
+    await Appointment.deleteMany({ patientId: id });
+    return res.status(200).json({ status: true, message: "Patient Deleted" });
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
   }
-  const deleting = await User.deleteOne({_id:id})
-  if(!deleting){
-    return res.status(404).json({status:false, message:"Patient deleted unsuccessfull"})
-  }
-    return res.status(200).json({status:true, message:"Patient Deleted"})
-}
+};

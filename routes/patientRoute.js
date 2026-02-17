@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAppointment, makeAppointment } from "../controllers/patient.js";
+import { getAllAppointment, getAppointment, makeAppointment } from "../controllers/patient.js";
 import { authenticateToken } from "../middleware/authenticateToken.js";
 
 const router = Router();
@@ -10,5 +10,8 @@ router.post("/appointment", authenticateToken, makeAppointment);
 
 // get Appointments with patient and doctor details "/appointment"
 router.get("/appointment", authenticateToken,getAppointment)
+
+// get all Appointments with patient and doctor details "/appointment"
+router.get("/all-appointment", authenticateToken,getAllAppointment)
 
 export default router;
