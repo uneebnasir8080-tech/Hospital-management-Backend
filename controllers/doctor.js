@@ -61,9 +61,6 @@ export const setSchedule = async (req, res) => {
 export const getSchedule = async (req, res) => {
   try {
     const {docId}=req.query
-    // const userId = req.userId;
-    // console.log("first", docId)
-    // const doctorId = req.body;
     if (!docId) {
       return res
         .status(400)

@@ -42,13 +42,13 @@ export const createUser = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Something went wrong" });
     }
-   const data = {
-  id: savedUser.id,
-  name: savedUser.name,
-};
+    const data = {
+      id: savedUser.id,
+      name: savedUser.name,
+    };
     return res
       .status(200)
-      .json({ status: true, message: "Successfully registered",data });
+      .json({ status: true, message: "Successfully registered", data });
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -63,24 +63,24 @@ export const createUser = async (req, res) => {
 export const userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(401).json({
         status: false,
         message: "Email or Password must not be empty",
       });
     }
-
+    
     // checking user exists or not
     const checkUser = await User.findOne({ email })
       .populate("doctor")
       .populate("patient")
       .populate("admin");
-    if (!checkUser) {
-      return res
+      if (!checkUser) {
+        return res
         .status(404)
         .json({ status: false, message: "Invalid Credentials" });
-    }
+      }
+      
 
     // checking password
 
@@ -98,14 +98,64 @@ export const userLogin = async (req, res) => {
       .setExpirationTime("24h")
       .setProtectedHeader({ alg: "HS256" })
       .sign(secret);
-    const userdata = {
-      id: checkUser._id,
-      name: checkUser.name,
-      email: checkUser.email,
-      role: checkUser.role,
-    };
+
+       const userdata = {
+        id: checkUser._id,
+        name: checkUser.name,
+        email: checkUser.email,
+        role: checkUser.role,
+      };
+
+
+    if (checkUser.role === "patient" && checkUser.patient !== null) {
+      const userdata = {
+        id: checkUser._id,
+        name: checkUser.name,
+        email: checkUser.email,
+        role: checkUser.role,
+        detail: checkUser.patient,
+      };
+      return res.status(200).json({
+        status: true,
+        message: "Login Successfull",
+        user: userdata,
+        token,
+      });
+    }
+    if (checkUser.role === "doctor" && checkUser.doctor !== null) {
+      const userdata = {
+        id: checkUser._id,
+        name: checkUser.name,
+        email: checkUser.email,
+        role: checkUser.role,
+        detail: checkUser.doctor,
+      };
+
+      return res.status(200).json({
+        status: true,
+        message: "Login Successfull",
+        user: userdata,
+        token,
+      });
+    }
+    if (checkUser.role === "admin" && checkUser.admin !== null) {
+      const userdata = {
+        id: checkUser._id,
+        name: checkUser.name,
+        email: checkUser.email,
+        role: checkUser.role,
+        detail: checkUser.admin,
+      };
+      return res.status(200).json({
+        status: true,
+        message: "Login Successfull",
+        user: userdata,
+        token,
+      });
+    }
     //checking their profile data filled or not
     if (checkUser.role === "patient" && checkUser.patient === null) {
+      
       return res.status(200).json({
         status: true,
         message: "Profile inComplete",
@@ -129,12 +179,6 @@ export const userLogin = async (req, res) => {
         token,
       });
     }
-    return res.status(200).json({
-      status: true,
-      message: "Login Successfull",
-      user: userdata,
-      token,
-    });
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -194,7 +238,7 @@ export const addPatient = async (req, res) => {
         .json({ status: false, message: "Feild shouldn't be empty" });
     }
     const { path } = req.file;
-    const {id} = req.query;
+    const { id } = req.query;
     const checkPatient = await Patient.findOne({ userId: id });
     if (checkPatient) {
       return res
@@ -215,7 +259,9 @@ export const addPatient = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Form submitted unsuccessful" });
     }
-    return res.status(200).json({ status: true, message: "Form Submitted" });
+    return res
+      .status(200)
+      .json({ status: true, message: "Form Submitted", patient: data });
   } catch (error) {
     return res.status(500).json({
       status: false,

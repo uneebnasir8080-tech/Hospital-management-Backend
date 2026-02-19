@@ -49,4 +49,5 @@ userSchema.virtual("doctor", {
   justOne:true
 });
 
+
 export const User = mongoose.model("User", userSchema);

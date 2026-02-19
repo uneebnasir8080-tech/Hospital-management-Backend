@@ -4,6 +4,7 @@ import { Patient } from "../models/patient.js";
 import { normalizeDate, weekDays } from "../lib/weekdays.js";
 import {sendMail} from "../utils/emailSender.js"
 import {emailVerification} from "../utils/emailTemplate/emailverification.js"
+import { User } from "../models/user.js";
 
 // patient make appointment "/patient/appointment"
 
@@ -43,7 +44,7 @@ export const makeAppointment = async (req, res) => {
     
     const checkingAppointment= checkDoctor?.appointment
     //   checking patient
-    const checkPatient = await Patient.findOne({ userId: patientId });
+    const checkPatient = await Patient.findOne({ _id: patientId });
     if (!checkPatient) {
       return res
         .status(404)
@@ -138,7 +139,7 @@ export const makeAppointment = async (req, res) => {
 
 export const getAppointment = async (req, res) => {
   try {
-    const userId = req.userId;
+    const {userId} = req.query;
     if (!userId) {
       return res
         .status(400)
@@ -183,21 +184,24 @@ export const getAllAppointment = async (req, res) => {
       return res
         .status(400)
         .json({ status: false, message: "Reference not found" });
-    }
+    }    
     const getData = await Appointment.find()
-    .populate('patientId')
-    .populate('doctorId')
-    
-    
-    // .populate({
-    //   path:"appointment",
-    //   populate:{
-    //     path:"doctorId",
-    //     populate:{
-    //       path:"userId"
-    //     }
-    //   }
-    // })
+  .populate({
+    path:"patientId",
+    select:"age",
+    populate:{
+      path:"userId",
+      select:"name"
+    }
+  })
+  .populate({
+    path:"doctorId",
+    select:"specialization",
+    populate:{
+      path:"userId",
+      select:"name"
+    }
+  })
     if (!getData) {
       return res
         .status(400)
