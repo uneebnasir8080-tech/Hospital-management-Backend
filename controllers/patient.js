@@ -11,7 +11,7 @@ import { User } from "../models/user.js";
 export const makeAppointment = async (req, res) => {
   try {
     const { doctorId, patientId, date, time, status } = req.body;
-    if (!doctorId || !patientId || !date || !date || !time) {
+    if (!doctorId || !patientId || !date || !time) {
       return res
         .status(400)
         .json({ status: false, message: "Fill the required feild" });
@@ -56,21 +56,6 @@ export const makeAppointment = async (req, res) => {
         .status(401)
         .json({ status: false, message: `Doctor is not available on ${day}` });
     }
-
-   // check Appointment doctor has already appointment on that day or not 
-// const isBooked = checkingAppointment.some((check) =>
-//   check.doctorId === doctorId &&
-//   check.time === time &&
-//   normalizeDate(check.date) === date
-// );
-
-
-// if (isBooked) {
-//   return res.status(404).json({
-//     status: false,
-//     message: "Doctor slot already booked",
-//   });
-// }
 
 
     //  check appointment avaiable or not

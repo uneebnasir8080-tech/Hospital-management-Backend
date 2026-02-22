@@ -169,3 +169,34 @@ export const cancelAppointment = async (req, res) => {
     });
   }
 };
+
+
+// delete appointment by appointment id 
+
+export const deleteAppointment = async (req, res) => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(400).json({
+      status: false,
+      message: "Something went wrong",
+    });
+  }
+  const { id } = req.query;
+  try {
+    // checking exist or not
+    const checkAppointment = await Appointment.findByIdAndDelete(id);
+    console.log("hello checked",checkAppointment)
+    if (!checkAppointment) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Appointment not exists" });
+    }
+    return res.status(200).json({ status: true, message: "Appointment Deleted" });
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+};
