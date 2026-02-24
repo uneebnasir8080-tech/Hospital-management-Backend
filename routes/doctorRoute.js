@@ -1,6 +1,7 @@
-import { cancelAppointment, deleteAppointment, getAppointment, getSchedule, setSchedule } from "../controllers/doctor.js";
+import { cancelAppointment, deleteAppointment, getAppointment, getCountAppoint, getCountPatient, getSchedule, setSchedule } from "../controllers/doctor.js";
 import { authenticateToken } from "../middleware/authenticateToken.js";
 import { Router } from "express";
+import { Appointment } from "../models/appointment.js";
 
 const router= Router()
 
@@ -19,5 +20,12 @@ router.post("/cancel-appointment", authenticateToken, cancelAppointment)
 // delete appointment
 
 router.delete("/appointment", authenticateToken, deleteAppointment)
+
+// count of Appointment 
+router.get("/count-appoint", authenticateToken, getCountAppoint)
+
+// count of Patient 
+router.get("/count-patient", authenticateToken, getCountPatient)
+
 
 export default router

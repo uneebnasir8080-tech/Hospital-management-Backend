@@ -1,7 +1,7 @@
 import { Appointment } from "../models/appointment.js";
 import { Doctor } from "../models/doctor.js";
 import { Schedule } from "../models/schedule.js";
-import { User } from "../models/user.js";
+import { Patient } from "../models/patient.js";
 import { sendMail } from "../utils/emailSender.js";
 import { emailVerification } from "../utils/emailTemplate/emailverification.js";
 
@@ -185,7 +185,6 @@ export const deleteAppointment = async (req, res) => {
   try {
     // checking exist or not
     const checkAppointment = await Appointment.findByIdAndDelete(id);
-    console.log("hello checked",checkAppointment)
     if (!checkAppointment) {
       return res
         .status(404)
@@ -200,3 +199,60 @@ export const deleteAppointment = async (req, res) => {
     });
   }
 };
+
+
+// get appointments count 
+
+export const getCountAppoint=async(req,res)=>{
+  try {
+    const userId= req.userId
+  if (!userId) {
+    return res.status(400).json({
+      status: false,
+      message: "Something went wrong",
+    });
+  }
+
+  const totalAppoint= await Appointment.countDocuments()
+  if(!totalAppoint){
+    return res.status(404).json({status:false, message:"No Appointment found"})
+  }
+    return res.status(200).json({status:true, message:"Total Appointments", totalAppoint})
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+  
+
+}
+
+// get all patient counts 
+
+export const getCountPatient=async(req,res)=>{
+  try {
+    const userId= req.userId
+  if (!userId) {
+    return res.status(400).json({
+      status: false,
+      message: "Something went wrong",
+    });
+  }
+
+  const totalPatient= await Patient.countDocuments()
+  if(!totalPatient){
+    return res.status(404).json({status:false, message:"No Patient found"})
+  }
+    return res.status(200).json({status:true, message:"Total Patient", totalPatient})
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+  
+
+}
