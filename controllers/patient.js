@@ -53,7 +53,7 @@ export const makeAppointment = async (req, res) => {
     // checking doctor avaiable on specific day 
     if (!checkDoctor.schedule.days.includes(day)) {
       return res
-        .status(401)
+        .status(404)
         .json({ status: false, message: `Doctor is not available on ${day}` });
     }
 
@@ -187,6 +187,7 @@ export const getAllAppointment = async (req, res) => {
       select:"name"
     }
   })
+  .sort({ createdAt: -1 }); // newest first
     if (!getData) {
       return res
         .status(400)

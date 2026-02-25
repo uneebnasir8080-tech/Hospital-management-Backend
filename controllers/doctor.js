@@ -215,7 +215,7 @@ export const getCountAppoint=async(req,res)=>{
 
   const totalAppoint= await Appointment.countDocuments()
   if(!totalAppoint){
-    return res.status(404).json({status:false, message:"No Appointment found"})
+    return res.status(200).json({status:true,message:"Total Appointments", totalAppoint:0})
   }
     return res.status(200).json({status:true, message:"Total Appointments", totalAppoint})
   } catch (error) {
@@ -243,7 +243,7 @@ export const getCountPatient=async(req,res)=>{
 
   const totalPatient= await Patient.countDocuments()
   if(!totalPatient){
-    return res.status(404).json({status:false, message:"No Patient found"})
+    return res.status(200).json({status:true, message:"Total Patient", totalPatient:0})
   }
     return res.status(200).json({status:true, message:"Total Patient", totalPatient})
   } catch (error) {

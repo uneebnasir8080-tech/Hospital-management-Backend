@@ -9,7 +9,7 @@ const scheduleSchema = new mongoose.Schema(
     },
     days: {
       type: [String],
-      enum: ["mon", "tue", "wed", "thr", "fri", "sat", "sun"],
+      enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       required: true,
     },
     slot: {

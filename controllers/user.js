@@ -483,7 +483,9 @@ export const getAllPatient = async (req, res) => {
         message: "Something went wrong",
       });
     }
-    const getData = await User.find({ role: "patient" }).populate("patient");
+    const getData = await User.find({ role: "patient" })
+    .populate("patient")
+    .sort({ createdAt: -1 }); // newest first
     if (!getData) {
       return res
         .status(404)
