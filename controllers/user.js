@@ -69,18 +69,17 @@ export const userLogin = async (req, res) => {
         message: "Email or Password must not be empty",
       });
     }
-    
+
     // checking user exists or not
     const checkUser = await User.findOne({ email })
       .populate("doctor")
       .populate("patient")
       .populate("admin");
-      if (!checkUser) {
-        return res
+    if (!checkUser) {
+      return res
         .status(404)
         .json({ status: false, message: "Invalid Credentials" });
-      }
-      
+    }
 
     // checking password
 
@@ -99,13 +98,12 @@ export const userLogin = async (req, res) => {
       .setProtectedHeader({ alg: "HS256" })
       .sign(secret);
 
-       const userdata = {
-        id: checkUser._id,
-        name: checkUser.name,
-        email: checkUser.email,
-        role: checkUser.role,
-      };
-
+    const userdata = {
+      id: checkUser._id,
+      name: checkUser.name,
+      email: checkUser.email,
+      role: checkUser.role,
+    };
 
     if (checkUser.role === "patient" && checkUser.patient !== null) {
       const userdata = {
@@ -155,7 +153,6 @@ export const userLogin = async (req, res) => {
     }
     //checking their profile data filled or not
     if (checkUser.role === "patient" && checkUser.patient === null) {
-      
       return res.status(200).json({
         status: true,
         message: "Profile inComplete",
@@ -484,8 +481,8 @@ export const getAllPatient = async (req, res) => {
       });
     }
     const getData = await User.find({ role: "patient" })
-    .populate("patient")
-    .sort({ createdAt: -1 }); // newest first
+      .populate("patient")
+      .sort({ createdAt: -1 }); // newest first
     if (!getData) {
       return res
         .status(404)
@@ -529,4 +526,97 @@ export const deletePatient = async (req, res) => {
       message: "Server error",
     });
   }
+};
+
+// update user
+
+export const updateUser = async (req, res) => {
+  const userId = req.userId;
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ status: false, message: "Authentication Error" });
+  }
+  const { name } = req.body;
+  if (!name) {
+    return res
+      .status(400)
+      .json({ status: false, message: "Feild shouldn't be empty" });
+  }
+
+  // const { path } = req.file;
+  const path = req.file ? req.file.path : undefined;
+  const { id } = req.query;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ status: false, message: "User Id not found" });
+  }
+
+  // checking user and update that
+  const check = await User.findByIdAndUpdate(id, { name }, { new: true });
+  if (!check) {
+    return res.status(404).json({ status: false, message: "User not found" });
+  }
+  if (check.role === "patient") {
+    const { name, age, gender, blood, history } = req.body;
+    if (!age || !gender || !blood || !history) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Feild shouldn't be empty" });
+    }
+    // update patient data also
+    const patient = await Patient.findOne({ userId: id });
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    patient.age = age;
+    if (path && path !== undefined) {
+      patient.profile = path;
+    }
+    patient.gender = gender;
+    patient.blood = blood;
+    patient.history = history;
+
+    await patient.save();
+    // getting updated data to send response
+    const updated = await check.populate("patient");
+    return res
+      .status(200)
+      .json({ status: true, message: "Profile Updated", data: updated });
+  }
+  if (check.role === "doctor") {
+    const { age, gender, specialization, experience } = req.body;
+    if (!age || !gender || !specialization || !experience) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Feild shouldn't be empty" });
+    }
+    // update patient data also
+    const doctor = await Doctor.findOne({ userId: id });
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    doctor.age = age;
+    if (path && path !== undefined) {
+      doctor.profile = path;
+    }
+    doctor.gender = gender;
+    doctor.specialization = specialization;
+    doctor.experience = experience;
+
+    await doctor.save();
+    // getting updated data to send response
+    const updated = await check.populate("doctor");
+    return res
+      .status(200)
+      .json({ status: true, message: "Profile Updated", data: updated });
+  }
+  return res
+    .status(404)
+    .json({ status: false, message: "Something went wrong" });
 };

@@ -173,7 +173,7 @@ export const getAllAppointment = async (req, res) => {
     const getData = await Appointment.find()
   .populate({
     path:"patientId",
-    select:"age",
+    select:"age, profile",
     populate:{
       path:"userId",
       select:"name"

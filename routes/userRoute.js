@@ -10,6 +10,7 @@ import {
   getAllPatient,
   getAllUser,
   getUser,
+  updateUser,
   userLogin,
 } from "../controllers/user.js";
 import validate from "../middleware/validate.js";
@@ -46,5 +47,9 @@ router.get("/all-patient", authenticateToken, getAllPatient)
 
 // delete patient 
 router.delete("/patient/:id",authenticateToken, deletePatient)
+
+
+// update profile 
+router.put("/update-user",authenticateToken,upload.single("profileImage"),updateUser)
 
 export default router;

@@ -8,7 +8,7 @@ const router = Router();
 // route for making appointment 
 router.post("/appointment", authenticateToken, makeAppointment);
 
-// get Appointments with patient and doctor details "/appointment"
+// get single Appointments with patient and doctor details "/appointment"
 router.get("/appointment", authenticateToken,getAppointment)
 
 // get all Appointments with patient and doctor details "/appointment"
