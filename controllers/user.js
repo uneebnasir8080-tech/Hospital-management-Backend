@@ -61,128 +61,214 @@ export const createUser = async (req, res) => {
 // login user  "/login"
 
 export const userLogin = async (req, res) => {
+  // try {
+  //   const { email, password } = req.body;
+  //   if (!email || !password) {
+  //     return res.status(401).json({
+  //       status: false,
+  //       message: "Email or Password must not be empty",
+  //     });
+  //   }
+
+  //   // checking user exists or not
+  //   const checkUser = await User.findOne({ email })
+  //     .populate("doctor")
+  //     .populate("patient")
+  //     .populate("admin");
+  //   if (!checkUser) {
+  //     return res
+  //       .status(404)
+  //       .json({ status: false, message: "Invalid Credentials" });
+  //   }
+
+  //   // checking password
+
+  //   const verifyPasword = await bcrypt.compare(password, checkUser.password);
+  //   if (!verifyPasword) {
+  //     return res
+  //       .status(404)
+  //       .json({ status: false, message: "Invalid Credentials" });
+  //   }
+  //   const id = checkUser._id.toString();
+  //   // token generating
+  //   const secret = new TextEncoder().encode(process.env.SECRET_KEY);
+  //   const token = await new SignJWT({ userId: id })
+  //     .setIssuedAt()
+  //     .setExpirationTime("24h")
+  //     .setProtectedHeader({ alg: "HS256" })
+  //     .sign(secret);
+
+  //   const userdata = {
+  //     id: checkUser._id,
+  //     name: checkUser.name,
+  //     email: checkUser.email,
+  //     role: checkUser.role,
+  //   };
+
+  //   if (checkUser.role === "patient" && checkUser.patient !== null) {
+  //     const userdata = {
+  //       id: checkUser._id,
+  //       name: checkUser.name,
+  //       email: checkUser.email,
+  //       role: checkUser.role,
+  //       detail: checkUser.patient,
+  //     };
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "Login Successfull",
+  //       user: userdata,
+  //       token,
+  //     });
+  //   }
+  //   if (checkUser.role === "doctor" && checkUser.doctor !== null) {
+  //     const userdata = {
+  //       id: checkUser._id,
+  //       name: checkUser.name,
+  //       email: checkUser.email,
+  //       role: checkUser.role,
+  //       detail: checkUser.doctor,
+  //     };
+
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "Login Successfull",
+  //       user: userdata,
+  //       token,
+  //     });
+  //   }
+  //   if (checkUser.role === "admin" && checkUser.admin !== null) {
+  //     const userdata = {
+  //       id: checkUser._id,
+  //       name: checkUser.name,
+  //       email: checkUser.email,
+  //       role: checkUser.role,
+  //       detail: checkUser.admin,
+  //     };
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "Login Successfull",
+  //       user: userdata,
+  //       token,
+  //     });
+  //   }
+  //   //checking their profile data filled or not
+  //   if (checkUser.role === "patient" && checkUser.patient === null) {
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "Profile inComplete",
+  //       user: userdata,
+  //       token,
+  //     });
+  //   }
+  //   if (checkUser.role === "doctor" && checkUser.doctor === null) {
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "Profile inComplete",
+  //       user: userdata,
+  //       token,
+  //     });
+  //   }
+  //   if (checkUser.role === "admin" && checkUser.admin === null) {
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "Profile inComplete",
+  //       user: userdata,
+  //       token,
+  //     });
+  //   }
+  // } catch (error) {
+  //   return res.status(500).json({
+  //     status: false,
+  //     message: "Internal server error",
+  //     error: error?.message,
+  //   });
+  // }
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(401).json({
-        status: false,
-        message: "Email or Password must not be empty",
-      });
-    }
+  const { email, password } = req.body;
 
-    // checking user exists or not
-    const checkUser = await User.findOne({ email })
-      .populate("doctor")
-      .populate("patient")
-      .populate("admin");
-    if (!checkUser) {
-      return res
-        .status(404)
-        .json({ status: false, message: "Invalid Credentials" });
-    }
-
-    // checking password
-
-    const verifyPasword = await bcrypt.compare(password, checkUser.password);
-    if (!verifyPasword) {
-      return res
-        .status(404)
-        .json({ status: false, message: "Invalid Credentials" });
-    }
-    const id = checkUser._id.toString();
-    // token generating
-    const secret = new TextEncoder().encode(process.env.SECRET_KEY);
-    const token = await new SignJWT({ userId: id })
-      .setIssuedAt()
-      .setExpirationTime("24h")
-      .setProtectedHeader({ alg: "HS256" })
-      .sign(secret);
-
-    const userdata = {
-      id: checkUser._id,
-      name: checkUser.name,
-      email: checkUser.email,
-      role: checkUser.role,
-    };
-
-    if (checkUser.role === "patient" && checkUser.patient !== null) {
-      const userdata = {
-        id: checkUser._id,
-        name: checkUser.name,
-        email: checkUser.email,
-        role: checkUser.role,
-        detail: checkUser.patient,
-      };
-      return res.status(200).json({
-        status: true,
-        message: "Login Successfull",
-        user: userdata,
-        token,
-      });
-    }
-    if (checkUser.role === "doctor" && checkUser.doctor !== null) {
-      const userdata = {
-        id: checkUser._id,
-        name: checkUser.name,
-        email: checkUser.email,
-        role: checkUser.role,
-        detail: checkUser.doctor,
-      };
-
-      return res.status(200).json({
-        status: true,
-        message: "Login Successfull",
-        user: userdata,
-        token,
-      });
-    }
-    if (checkUser.role === "admin" && checkUser.admin !== null) {
-      const userdata = {
-        id: checkUser._id,
-        name: checkUser.name,
-        email: checkUser.email,
-        role: checkUser.role,
-        detail: checkUser.admin,
-      };
-      return res.status(200).json({
-        status: true,
-        message: "Login Successfull",
-        user: userdata,
-        token,
-      });
-    }
-    //checking their profile data filled or not
-    if (checkUser.role === "patient" && checkUser.patient === null) {
-      return res.status(200).json({
-        status: true,
-        message: "Profile inComplete",
-        user: userdata,
-        token,
-      });
-    }
-    if (checkUser.role === "doctor" && checkUser.doctor === null) {
-      return res.status(200).json({
-        status: true,
-        message: "Profile inComplete",
-        user: userdata,
-        token,
-      });
-    }
-    if (checkUser.role === "admin" && checkUser.admin === null) {
-      return res.status(200).json({
-        status: true,
-        message: "Profile inComplete",
-        user: userdata,
-        token,
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
+  if (!email || !password) {
+    return res.status(400).json({
       status: false,
-      message: "Internal server error",
-      error: error?.message,
+      message: "Email and Password are required",
     });
   }
+
+  // Check user exists
+  const checkUser = await User.findOne({ email })
+    .populate("doctor")
+    .populate("patient")
+    .populate("admin");
+
+  if (!checkUser) {
+    return res.status(401).json({
+      status: false,
+      message: "Invalid Credentials",
+    });
+  }
+
+  // Verify password
+  const verifyPassword = await bcrypt.compare(
+    password,
+    checkUser.password
+  );
+
+  if (!verifyPassword) {
+    return res.status(401).json({
+      status: false,
+      message: "Invalid Credentials",
+    });
+  }
+
+  const id = checkUser._id.toString();
+
+  // 🔐 Generate JWT
+  const secret = new TextEncoder().encode(process.env.SECRET_KEY);
+
+  const token = await new SignJWT({ userId: id })
+    .setIssuedAt()
+    .setExpirationTime("24h")
+    .setProtectedHeader({ alg: "HS256" })
+    .sign(secret);
+
+  // 👇 Determine role detail dynamically
+  let detail = null;
+
+  if (checkUser.role === "patient") detail = checkUser.patient;
+  if (checkUser.role === "doctor") detail = checkUser.doctor;
+  if (checkUser.role === "admin") detail = checkUser.admin;
+
+  const userData = {
+    id: checkUser._id,
+    name: checkUser.name,
+    email: checkUser.email,
+    role: checkUser.role,
+    detail,
+  };
+
+  // 👇 Profile incomplete handling
+  if (!detail) {
+    return res.status(200).json({
+      status: true,
+      message: "Profile Incomplete",
+      user: userData,
+      token,
+    });
+  }
+
+  return res.status(200).json({
+    status: true,
+    message: "Login Successful",
+    user: userData,
+    token,
+  });
+
+} catch (error) {
+  return res.status(500).json({
+    status: false,
+    message: "Internal Server Error",
+    error: error?.message,
+  });
+}
 };
 
 // change password
