@@ -184,91 +184,87 @@ export const userLogin = async (req, res) => {
   //   });
   // }
   try {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({
-      status: false,
-      message: "Email and Password are required",
-    });
-  }
+    if (!email || !password) {
+      return res.status(400).json({
+        status: false,
+        message: "Email and Password are required",
+      });
+    }
 
-  // Check user exists
-  const checkUser = await User.findOne({ email })
-    .populate("doctor")
-    .populate("patient")
-    .populate("admin");
+    // Check user exists
+    const checkUser = await User.findOne({ email })
+      .populate("doctor")
+      .populate("patient")
+      .populate("admin");
 
-  if (!checkUser) {
-    return res.status(401).json({
-      status: false,
-      message: "Invalid Credentials",
-    });
-  }
+    if (!checkUser) {
+      return res.status(401).json({
+        status: false,
+        message: "Invalid Credentials",
+      });
+    }
 
-  // Verify password
-  const verifyPassword = await bcrypt.compare(
-    password,
-    checkUser.password
-  );
+    // Verify password
+    const verifyPassword = await bcrypt.compare(password, checkUser.password);
 
-  if (!verifyPassword) {
-    return res.status(401).json({
-      status: false,
-      message: "Invalid Credentials",
-    });
-  }
+    if (!verifyPassword) {
+      return res.status(401).json({
+        status: false,
+        message: "Invalid Credentials",
+      });
+    }
 
-  const id = checkUser._id.toString();
+    const id = checkUser._id.toString();
 
-  // 🔐 Generate JWT
-  const secret = new TextEncoder().encode(process.env.SECRET_KEY);
+    // 🔐 Generate JWT
+    const secret = new TextEncoder().encode(process.env.SECRET_KEY);
 
-  const token = await new SignJWT({ userId: id })
-    .setIssuedAt()
-    .setExpirationTime("24h")
-    .setProtectedHeader({ alg: "HS256" })
-    .sign(secret);
+    const token = await new SignJWT({ userId: id })
+      .setIssuedAt()
+      .setExpirationTime("24h")
+      .setProtectedHeader({ alg: "HS256" })
+      .sign(secret);
 
-  // 👇 Determine role detail dynamically
-  let detail = null;
+    // 👇 Determine role detail dynamically
+    let detail = null;
 
-  if (checkUser.role === "patient") detail = checkUser.patient;
-  if (checkUser.role === "doctor") detail = checkUser.doctor;
-  if (checkUser.role === "admin") detail = checkUser.admin;
+    if (checkUser.role === "patient") detail = checkUser.patient;
+    if (checkUser.role === "doctor") detail = checkUser.doctor;
+    if (checkUser.role === "admin") detail = checkUser.admin;
 
-  const userData = {
-    id: checkUser._id,
-    name: checkUser.name,
-    email: checkUser.email,
-    role: checkUser.role,
-    detail,
-  };
+    const userData = {
+      id: checkUser._id,
+      name: checkUser.name,
+      email: checkUser.email,
+      role: checkUser.role,
+      detail,
+    };
 
-  // 👇 Profile incomplete handling
-  if (!detail) {
+    // 👇 Profile incomplete handling
+    if (!detail) {
+      return res.status(200).json({
+        status: true,
+        message: "Profile Incomplete",
+        user: userData,
+        token,
+      });
+    }
+
     return res.status(200).json({
       status: true,
-      message: "Profile Incomplete",
+      message: "Login Successful",
       user: userData,
       token,
     });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+      error: error?.message,
+    });
   }
-
-  return res.status(200).json({
-    status: true,
-    message: "Login Successful",
-    user: userData,
-    token,
-  });
-
-} catch (error) {
-  return res.status(500).json({
-    status: false,
-    message: "Internal Server Error",
-    error: error?.message,
-  });
-}
 };
 
 // change password

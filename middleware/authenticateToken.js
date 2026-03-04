@@ -5,6 +5,7 @@ export const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1]; // Bearer token
+
     if (!token) {
       return res
         .status(400)
@@ -13,7 +14,9 @@ export const authenticateToken = async (req, res, next) => {
 
     // decoded token
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
+
     const decoded = await jwtVerify(token, secret);
+
     const userId = decoded.id || decoded.userId || decoded.payload.userId;
     if (!userId) {
       return res
@@ -23,20 +26,20 @@ export const authenticateToken = async (req, res, next) => {
 
     const checkUser = await User.findById(userId);
     if (!checkUser) {
-      return res.status(404).json({ status: false, message: "User not found" });
+      return res.status(403).json({ status: false, message: "User not found" });
     }
     req.userId = userId;
     req.user = checkUser;
     next();
   } catch (error) {
-    if (error.name === "JsonWebTokenError") {
+    if (error.name === "JWTError") {
       return res.status(401).json({
         success: false,
         message: "Invalid token",
       });
     }
 
-    if (error.name === "TokenExpiredError") {
+    if (error.name === "JWTExpired") {
       return res.status(401).json({
         success: false,
         message: "Token expired",
@@ -44,7 +47,7 @@ export const authenticateToken = async (req, res, next) => {
     }
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal servers error",
     });
   }
 };
