@@ -2,9 +2,10 @@ import { Appointment } from "../models/appointment.js";
 import { Doctor } from "../models/doctor.js";
 import { Patient } from "../models/patient.js";
 import { normalizeDate, weekDays } from "../lib/weekdays.js";
-import {sendMail} from "../utils/emailSender.js"
-import {emailVerification} from "../utils/emailTemplate/emailverification.js"
+import { sendMail } from "../utils/emailSender.js";
+import { emailVerification } from "../utils/emailTemplate/emailverification.js";
 import { User } from "../models/user.js";
+import { getPagination, getTotalPages } from "../utils/pagination.js";
 
 // patient make appointment "/patient/appointment"
 
@@ -32,8 +33,8 @@ export const makeAppointment = async (req, res) => {
 
     //   checking doctor
     const checkDoctor = await Doctor.findOne({ _id: doctorId })
-    .populate("schedule",)
-    .populate("appointment")
+      .populate("schedule")
+      .populate("appointment");
 
     if (!checkDoctor || !checkDoctor.schedule) {
       return res
@@ -41,8 +42,7 @@ export const makeAppointment = async (req, res) => {
         .json({ status: false, message: "Doctor or schedule not exists" });
     }
 
-    
-    const checkingAppointment= checkDoctor?.appointment
+    const checkingAppointment = checkDoctor?.appointment;
     //   checking patient
     const checkPatient = await Patient.findOne({ _id: patientId });
     if (!checkPatient) {
@@ -50,13 +50,12 @@ export const makeAppointment = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Patient not exists" });
     }
-    // checking doctor avaiable on specific day 
+    // checking doctor avaiable on specific day
     if (!checkDoctor.schedule.days.includes(day)) {
       return res
         .status(404)
         .json({ status: false, message: `Doctor is not available on ${day}` });
     }
-
 
     //  check appointment avaiable or not
     const slotBooked = await Appointment.findOne({
@@ -108,9 +107,7 @@ export const makeAppointment = async (req, res) => {
         "https://www.linkedin.com/in/uneeb-nasir80",
       ),
     );
-    return res
-      .status(200)
-      .json({ status: true, message: "Confirm Payment" });
+    return res.status(200).json({ status: true, message: "Confirm Payment" });
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -124,7 +121,7 @@ export const makeAppointment = async (req, res) => {
 
 export const getAppointment = async (req, res) => {
   try {
-    const {userId} = req.query;
+    const { userId } = req.query;
     if (!userId) {
       return res
         .status(400)
@@ -136,14 +133,14 @@ export const getAppointment = async (req, res) => {
         .json({ status: false, message: "Only patient can get this" });
     }
     const getData = await Patient.findOne({ userId }).populate({
-      path:"appointment",
-      populate:{
-        path:"doctorId",
-        populate:{
-          path:"userId"
-        }
-      }
-    })
+      path: "appointment",
+      populate: {
+        path: "doctorId",
+        populate: {
+          path: "userId",
+        },
+      },
+    });
     if (!getData) {
       return res
         .status(400)
@@ -159,8 +156,7 @@ export const getAppointment = async (req, res) => {
   }
 };
 
-
-// get all patient and appointments with doctor 
+// get all patient and appointments with doctor
 
 export const getAllAppointment = async (req, res) => {
   try {
@@ -169,30 +165,82 @@ export const getAllAppointment = async (req, res) => {
       return res
         .status(400)
         .json({ status: false, message: "Reference not found" });
-    }    
+    }
+    const {limit, page}= req.query;
+    if(!limit && !page){
+       const getData = await Appointment.find()
+      .populate({
+        path: "patientId",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      })
+      .populate({
+        path: "doctorId",
+        select: "specialization",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      })
+      .sort({ createdAt: -1 })
+       if (!getData) {
+      return res
+        .status(400)
+        .json({ status: false, message: "No Record found" });
+    }
+    return res
+      .status(200)
+      .json({
+        getData,
+      });
+    }
+
+    let pagination;
+    try {
+      pagination = getPagination(req.query, { defaultLimit: 5 });
+    } catch (validationError) {
+      return res
+        .status(400)
+        .json({ success: false, message: validationError.message });
+    }
+
+    const totalCount = await Appointment.find().countDocuments();
     const getData = await Appointment.find()
-  .populate({
-    path:"patientId",
-    populate:{
-      path:"userId",
-      select:"name"
-    }
-  })
-  .populate({
-    path:"doctorId",
-    select:"specialization",
-    populate:{
-      path:"userId",
-      select:"name"
-    }
-  })
-  .sort({ createdAt: -1 }); // newest first
+      .populate({
+        path: "patientId",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      })
+      .populate({
+        path: "doctorId",
+        select: "specialization",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      })
+      .sort({ createdAt: -1 })
+      .limit(pagination.limit)
+      .skip(pagination.skip); // newest first
     if (!getData) {
       return res
         .status(400)
         .json({ status: false, message: "No Record found" });
     }
-    return res.status(200).json({ getData });
+    return res
+      .status(200)
+      .json({
+        getData,
+        pagination: getTotalPages(
+          totalCount,
+          pagination.limit,
+          pagination.page,
+        ),
+      });
   } catch (error) {
     return res.status(500).json({
       status: false,

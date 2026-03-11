@@ -5,6 +5,7 @@ import { Patient } from "../models/patient.js";
 import { Admin } from "../models/admin.js";
 import { Doctor } from "../models/doctor.js";
 import { Appointment } from "../models/appointment.js";
+import { getPagination, getTotalPages } from "../utils/pagination.js";
 
 // creating user on "/create"
 
@@ -529,7 +530,9 @@ export const getAllDoctors = async (req, res) => {
         message: "Something went wrong",
       });
     }
-    const getData = await User.find({ role: "doctor" }).populate({
+    const{limit ,page}= req.query
+    if(!limit && !page){
+      const getData = await User.find({ role: "doctor" }).populate({
       path: "doctor",
       populate: {
         path: "schedule",
@@ -542,6 +545,30 @@ export const getAllDoctors = async (req, res) => {
         .json({ status: false, message: "Doctor not found" });
     }
     return res.status(200).json({ getData });
+    }
+
+    let pagination 
+    try {
+      pagination= getPagination(req.query,{deafultLimit:5})
+    } catch (error) {
+      return res.status(400).json({status:false, message:error?.message})
+    }
+
+    const totalCount=await User.find({ role: "doctor" }).countDocuments()
+
+    const getData = await User.find({ role: "doctor" }).populate({
+      path: "doctor",
+      populate: {
+        path: "schedule",
+      },
+    }).limit(pagination.limit).skip(pagination.skip);
+
+    if (!getData) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Doctor not found" });
+    }
+    return res.status(200).json({ getData , pagination:getTotalPages(totalCount, pagination.limit, pagination.page) });
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -562,7 +589,31 @@ export const getAllPatient = async (req, res) => {
         message: "Something went wrong",
       });
     }
+    const {page, limit} = req.query
+     // without pagination
+  if (!page && !limit) {
     const getData = await User.find({ role: "patient" })
+      .populate("patient")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      status: true,
+      getData,
+    });
+  }
+
+    // pagination
+
+    let pagination
+     try {
+     pagination= getPagination(req.query,{defaultLimit:5})
+    } catch (validationError) {
+      return res.status(400).json({ success: false, message: validationError.message });
+    }
+
+    // for total counts 
+    const totalCount= await User.find({role: "patient" }).countDocuments()
+    const getData = await User.find({ role: "patient" }).limit(pagination.limit).skip(pagination.skip)
       .populate("patient")
       .sort({ createdAt: -1 }); // newest first
     if (!getData) {
@@ -570,7 +621,9 @@ export const getAllPatient = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Patient not found" });
     }
-    return res.status(200).json({ getData });
+    return res.status(200).json({ getData ,
+      pagination:getTotalPages(totalCount,pagination.limit,pagination.page)
+    });
   } catch (error) {
     return res.status(500).json({
       status: false,

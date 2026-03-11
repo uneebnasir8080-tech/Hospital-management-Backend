@@ -21,7 +21,9 @@ import { upload } from "../lib/upload.js";
 const router = Router();
 
 router.post("/create", validate(createUserSchema), createUser);
+
 router.post("/login", userLogin);
+
 router.patch("/user/changePassword", authenticateToken, chengePassword);
 
 // patient add
