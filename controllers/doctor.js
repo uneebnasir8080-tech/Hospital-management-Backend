@@ -4,6 +4,7 @@ import { Schedule } from "../models/schedule.js";
 import { Patient } from "../models/patient.js";
 import { sendMail } from "../utils/emailSender.js";
 import { emailVerification } from "../utils/emailTemplate/emailverification.js";
+import { User } from "../models/user.js";
 
 export const setSchedule = async (req, res) => {
   try {
@@ -256,3 +257,34 @@ export const getCountPatient=async(req,res)=>{
   
 
 }
+
+// delete Doctor by doctor id 
+
+export const deleteDoctor = async (req, res) => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(400).json({
+      status: false,
+      message: "Something went wrong",
+    });
+  }
+  const { id } = req.params;
+  console.log('id is',id)
+  try {
+    // checking exist or not
+    const checkDoctor = await User.findByIdAndDelete(id);
+    if (!checkDoctor) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Doctor not exists" });
+    }
+     await Doctor.deleteMany({ userId: id });
+    return res.status(200).json({ status: true, message: "Doctor Deleted" });
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+};

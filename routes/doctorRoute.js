@@ -1,4 +1,4 @@
-import { cancelAppointment, deleteAppointment, getAppointment, getCountAppoint, getCountPatient, getSchedule, setSchedule } from "../controllers/doctor.js";
+import { cancelAppointment, deleteAppointment, deleteDoctor, getAppointment, getCountAppoint, getCountPatient, getSchedule, setSchedule } from "../controllers/doctor.js";
 import { authenticateToken } from "../middleware/authenticateToken.js";
 import { Router } from "express";
 import { Appointment } from "../models/appointment.js";
@@ -20,6 +20,11 @@ router.post("/cancel-appointment", authenticateToken, cancelAppointment)
 // delete appointment
 
 router.delete("/appointment", authenticateToken, deleteAppointment)
+
+// delete doctor 
+
+router.delete("/delDoctor/:id", authenticateToken, deleteDoctor)
+
 
 // count of Appointment 
 router.get("/count-appoint", authenticateToken, getCountAppoint)
