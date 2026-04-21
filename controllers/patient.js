@@ -120,18 +120,21 @@ export const makeAppointment = async (req, res) => {
 // get Appointment from patient "/patient"
 
 export const getAppointment = async (req, res) => {
+ 
   try {
-    const { userId } = req.query;
+    const userId = req.userId;
     if (!userId) {
       return res
         .status(400)
         .json({ status: false, message: "Reference not found" });
     }
+
     if (req.user.role !== "patient") {
       return res
         .status(401)
         .json({ status: false, message: "Only patient can get this" });
     }
+
     const getData = await Patient.findOne({ userId }).populate({
       path: "appointment",
       populate: {
